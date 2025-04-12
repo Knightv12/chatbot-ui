@@ -1,24 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { X, Menu, LogIn, LogOut, Book, Users, Settings, Home } from 'lucide-react';
+import { X, Menu, LogIn, LogOut, Book, Users, Settings, Home, Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // Added useNavigate
+import { useAuth } from '@/context/AuthContext';
 
 export default function MainLeftSidebar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [role, setRole] = useState<'teacher' | 'student' | null>(null); // Login role
+  const navigate = useNavigate(); // Initialize useNavigate
+  const { user, isAuthenticated, logout } = useAuth();
 
   const toggleSidebar = () => setIsOpen(!isOpen);
+  const closeSidebar = () => setIsOpen(false);
 
   const handleLogin = () => {
-    // Simulate login logic
-    setIsLoggedIn(true);
-    setRole('teacher'); // Default to teacher, or switch based on actual requirements
+    // Navigate to login page
+    navigate('/login');
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    setRole(null);
+    logout();
+    navigate('/login');
+  };
+
+  const handleViewReviews = () => {
+    navigate('/reviews');
+  };
+
+  const handleStudentProgress = () => {
+    navigate('/student-progress');
   };
 
   return (
@@ -33,6 +43,15 @@ export default function MainLeftSidebar() {
         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </Button>
 
+      {/* Background overlay - only visible when sidebar is open */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 dark:bg-black/50 z-30" 
+          onClick={closeSidebar}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Sidebar */}
       <div
         className={cn(
@@ -45,7 +64,7 @@ export default function MainLeftSidebar() {
 
           {/* General features */}
           <div className="mb-4">
-            <Button variant="ghost" className="w-full justify-start gap-2">
+            <Button variant="ghost" className="w-full justify-start gap-2" onClick={() => navigate('/chat')}>
               <Home className="h-4 w-4" />
               Home
             </Button>
@@ -55,43 +74,37 @@ export default function MainLeftSidebar() {
             </Button>
           </div>
 
-          {/* Teacher features */}
-          {role === 'teacher' && (
+          {/* Role-specific features */}
+          {isAuthenticated && user && (
             <div className="mb-4">
-              <h3 className="text-sm font-semibold mb-2">Teacher Features</h3>
-              <Button variant="ghost" className="w-full justify-start gap-2">
-                <Book className="h-4 w-4" />
-                Course Management
-              </Button>
-              <Button variant="ghost" className="w-full justify-start gap-2">
-                <Users className="h-4 w-4" />
-                Student List
+              {user.role === 'teacher' && (
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start gap-2"
+                  onClick={handleStudentProgress}
+                >
+                  <Users className="h-4 w-4" />
+                  Student Progress
+                </Button>
+              )}
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start gap-2"
+                onClick={handleViewReviews}
+              >
+                <Star className="h-4 w-4" />
+                Teacher Reviews
               </Button>
             </div>
           )}
 
-          {/* Student features */}
-          {role === 'student' && (
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold mb-2">Student Features</h3>
-              <Button variant="ghost" className="w-full justify-start gap-2">
-                <Book className="h-4 w-4" />
-                Browse Courses
-              </Button>
-              <Button variant="ghost" className="w-full justify-start gap-2">
-                <Users className="h-4 w-4" />
-                Check Grades
-              </Button>
-            </div>
-          )}
-
-          {/* Login/Logout button */}
+          {/* Login/Logout */}
           <div className="mt-auto">
-            {!isLoggedIn ? (
+            {!isAuthenticated ? (
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2"
-                onClick={handleLogin}
+                onClick={handleLogin} // Navigate to login page
               >
                 <LogIn className="h-4 w-4" />
                 Login
@@ -100,7 +113,7 @@ export default function MainLeftSidebar() {
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2"
-                onClick={handleLogout}
+                onClick={handleLogout} // Execute logout logic
               >
                 <LogOut className="h-4 w-4" />
                 Logout

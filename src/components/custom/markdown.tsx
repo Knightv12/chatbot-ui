@@ -4,6 +4,13 @@ import remarkGfm from "remark-gfm";
 
 const NonMemoizedMarkdown = ({ children }: { children: string }) => {
   const components = {
+    p: ({ node, children, ...props }: any) => {
+      return (
+        <p className="text-base leading-6" {...props}>
+          {children}
+        </p>
+      );
+    },
     code: ({ node, inline, className, children, ...props }: any) => {
       const match = /language-(\w+)/.exec(className || "");
       return !inline && match ? (
@@ -24,28 +31,28 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
     },
     ol: ({ node, children, ...props }: any) => {
       return (
-        <ol className="list-decimal list-outside ml-4" {...props}>
+        <ol className="list-decimal list-outside ml-4 text-base" {...props}>
           {children}
         </ol>
       );
     },
     li: ({ node, children, ...props }: any) => {
       return (
-        <li className="py-1" {...props}>
+        <li className="py-1 text-base" {...props}>
           {children}
         </li>
       );
     },
     ul: ({ node, children, ...props }: any) => {
       return (
-        <ul className="list-decimal list-outside ml-4" {...props}>
+        <ul className="list-decimal list-outside ml-4 text-base" {...props}>
           {children}
         </ul>
       );
     },
     strong: ({ node, children, ...props }: any) => {
       return (
-        <span className="font-semibold" {...props}>
+        <span className="font-semibold text-base" {...props}>
           {children}
         </span>
       );
@@ -53,7 +60,7 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
     a: ({ node, children, ...props }: any) => {
       return (
         <a
-          className="text-blue-500 hover:underline"
+          className="text-blue-500 hover:underline text-base"
           target="_blank"
           rel="noreferrer"
           {...props}
@@ -64,42 +71,42 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
     },
     h1: ({ node, children, ...props }: any) => {
       return (
-        <h1 className="text-3xl font-semibold mt-6 mb-2" {...props}>
+        <h1 className="text-2xl font-semibold mt-6 mb-2" {...props}>
           {children}
         </h1>
       );
     },
     h2: ({ node, children, ...props }: any) => {
       return (
-        <h2 className="text-2xl font-semibold mt-6 mb-2" {...props}>
+        <h2 className="text-xl font-semibold mt-6 mb-2" {...props}>
           {children}
         </h2>
       );
     },
     h3: ({ node, children, ...props }: any) => {
       return (
-        <h3 className="text-xl font-semibold mt-6 mb-2" {...props}>
+        <h3 className="text-lg font-semibold mt-6 mb-2" {...props}>
           {children}
         </h3>
       );
     },
     h4: ({ node, children, ...props }: any) => {
       return (
-        <h4 className="text-lg font-semibold mt-6 mb-2" {...props}>
+        <h4 className="text-base font-semibold mt-6 mb-2" {...props}>
           {children}
         </h4>
       );
     },
     h5: ({ node, children, ...props }: any) => {
       return (
-        <h5 className="text-base font-semibold mt-6 mb-2" {...props}>
+        <h5 className="text-sm font-semibold mt-6 mb-2" {...props}>
           {children}
         </h5>
       );
     },
     h6: ({ node, children, ...props }: any) => {
       return (
-        <h6 className="text-sm font-semibold mt-6 mb-2" {...props}>
+        <h6 className="text-xs font-semibold mt-6 mb-2" {...props}>
           {children}
         </h6>
       );
@@ -107,9 +114,11 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
   };
 
   return (
-    <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-      {children}
-    </ReactMarkdown>
+    <div className="text-base font-normal">
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+        {children}
+      </ReactMarkdown>
+    </div>
   );
 };
 

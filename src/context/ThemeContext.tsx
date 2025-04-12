@@ -10,7 +10,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
-    return savedTheme === 'dark';
+    // 如果localStorage中沒有保存主題設置，則預設使用深色主題
+    return savedTheme ? savedTheme === 'dark' : true;
   });
 
   useEffect(() => {

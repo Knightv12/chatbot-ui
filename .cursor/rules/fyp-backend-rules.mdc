@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to
+
+Create a login system for teacher and student client, teacher could monitor student's learning progress(only specific at secondary maths) by looking at the visualize learning data, for example students weak at trigonometric function. So that teacher could know what areas his/here student good at or need to be improved. Use langchain handle the AI chatbox rontend request, use django server to tranmiss data to frontend.

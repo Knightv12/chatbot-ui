@@ -28,7 +28,7 @@ export const PreviewMessage = ({ message }: { message: message; }) => {
 
         <div className="flex flex-col w-full">
           {message.content && (
-            <div className="flex flex-col gap-4 text-left">
+            <div className="flex flex-col gap-4 text-left text-base">
               <Markdown>{message.content}</Markdown>
             </div>
           )}
