@@ -6,6 +6,7 @@ import { message } from "../../interfaces/interfaces"
 import { Overview } from "@/components/custom/overview";
 import { Header } from "@/components/custom/header";
 import {v4 as uuidv4} from 'uuid';
+import LeftSidebar from '@/components/custom/mainleftsidebar';
 
 const socket = new WebSocket("ws://localhost:8090"); //change to your websocket endpoint
 
@@ -14,7 +15,6 @@ export function Chat() {
   const [messages, setMessages] = useState<message[]>([]);
   const [question, setQuestion] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
   const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
 
   const cleanupMessageHandler = () => {
@@ -70,6 +70,7 @@ async function handleSubmit(text?: string) {
 
   return (
     <div className="flex flex-col min-w-0 h-dvh bg-background">
+      <LeftSidebar/>
       <Header/>
       <div className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4" ref={messagesContainerRef}>
         {messages.length == 0 && <Overview />}
@@ -89,4 +90,5 @@ async function handleSubmit(text?: string) {
       </div>
     </div>
   );
+  
 };
