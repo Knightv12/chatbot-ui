@@ -94,7 +94,7 @@ export default function MainLeftSidebar() {
                 onClick={handleViewReviews}
               >
                 <Star className="h-4 w-4" />
-                {user.role === 'student' ? '我的學習評語' : '學生評語管理'}
+                {user.role === 'student' ? 'My Reviews' : 'Student Reviews'}
               </Button>
             </div>
           )}

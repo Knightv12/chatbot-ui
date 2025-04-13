@@ -78,6 +78,35 @@ const reviewSchema = new mongoose.Schema({
 
 const Review = mongoose.model('Review', reviewSchema);
 
+// 示例評語數據
+const sampleReviews = [
+  {
+    content: "Student demonstrates excellent understanding of trigonometric functions and algebra. Needs to work on calculus concepts, recommend additional practice problems.",
+    rating: 4,
+    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // 30 days ago
+  },
+  {
+    content: "Makes good progress in problem-solving skills. Shows creativity in approaching complex problems. Could improve on time management during tests.",
+    rating: 5,
+    createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000) // 20 days ago
+  },
+  {
+    content: "Has difficulty with vector calculus concepts. Needs to focus on understanding the fundamental theorems. I recommend reviewing basic integration techniques.",
+    rating: 3,
+    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) // 10 days ago
+  },
+  {
+    content: "Great improvement in understanding differential equations! Keep up the good work and continue practicing with more complex examples.",
+    rating: 4,
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
+  },
+  {
+    content: "Recent test performance shows mastery of polynomial functions and sequences. Next focus area should be limits and continuity.",
+    rating: 5,
+    createdAt: new Date() // Today
+  }
+];
+
 // 主要函數：設置學生和老師關係
 async function setupTeacherStudentRelation() {
   try {
@@ -166,26 +195,30 @@ async function setupTeacherStudentRelation() {
         console.log(`學生 ${studentUser.username} 已經在老師 ${teacherUser.username} 的學生列表中`);
       }
       
-      // 創建示例評論
-      const existingReview = await Review.findOne({ 
+      // 刪除舊的評論以便添加新的示例評論
+      await Review.deleteMany({ 
         teacher: teacherUser._id, 
         student: studentUser._id 
       });
+      console.log('已刪除舊的評論');
       
-      if (!existingReview) {
+      // 創建多個示例評論
+      console.log('開始創建示例評論...');
+      
+      for (const reviewData of sampleReviews) {
         const review = new Review({
           teacher: teacherUser._id,
           student: studentUser._id,
-          content: "學生在數學方面表現良好，尤其是三角函數和代數。但需要在微積分方面加強練習，建議多做相關習題。",
-          rating: 4
+          content: reviewData.content,
+          rating: reviewData.rating,
+          createdAt: reviewData.createdAt
         });
         
         await review.save();
-        console.log('示例評論創建成功');
-      } else {
-        console.log('評論已存在，無需創建新的評論');
+        console.log(`創建評論成功: ${reviewData.content.substring(0, 30)}...`);
       }
       
+      console.log(`成功創建 ${sampleReviews.length} 條評論`);
       console.log('用戶關聯設置完成!');
     }
   } catch (error) {
