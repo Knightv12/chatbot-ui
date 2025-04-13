@@ -6,7 +6,7 @@ import { Header } from '@/components/custom/header';
 import LeftSidebar from '@/components/custom/mainleftsidebar';
 import { Star } from 'lucide-react';
 
-// 示例評論數據
+// Sample review data
 const sampleReviews: Review[] = [
   {
     _id: 'sample1',
@@ -100,7 +100,7 @@ const sampleReviews: Review[] = [
   }
 ];
 
-// 示例老師數據
+// Sample teacher data
 const sampleTeacher: User = {
   id: 'teacher1',
   username: 'Knightv12',
@@ -124,30 +124,30 @@ const Reviews = () => {
       
       try {
         if (user.role === 'student') {
-          // 如果是學生，獲取所有給該學生的評論
+          // If student, get all reviews for this student
           const result = await reviewsAPI.getStudentReviews(user.id);
           setReviews(result.reviews);
           
-          // 獲取學生的老師
+          // Get the student's teacher
           const teacherResult = await teacherStudentAPI.getStudentTeacher(user.id);
           if (teacherResult.teacher) {
             setTeacher(teacherResult.teacher);
           }
         } else if (user.role === 'teacher') {
-          // 如果是老師，獲取該老師發出的所有評論
+          // If teacher, get all reviews created by this teacher
           const result = await reviewsAPI.getTeacherReviews(user.id);
           setReviews(result.reviews);
         }
       } catch (err) {
         console.error('Error fetching reviews:', err);
-        // 使用示例數據替代
+        // Use sample data as fallback
         if (user.role === 'student') {
           setReviews(sampleReviews);
           setTeacher(sampleTeacher);
         } else {
           setReviews(sampleReviews);
         }
-        setError(null); // 清除錯誤，因為我們使用了示例數據
+        setError(null); // Clear error since we're using sample data
       } finally {
         setIsLoading(false);
       }
@@ -156,7 +156,7 @@ const Reviews = () => {
     fetchReviews();
   }, [user]);
 
-  // 渲染評分星星
+  // Render rating stars
   const renderStars = (rating: number) => {
     return (
       <div className="flex">

@@ -17,13 +17,13 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: process.env.BACKEND_URL || 'http://localhost:5000',
+        target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path
       },
       '/ws': {
-        target: process.env.WS_URL || 'ws://localhost:5000',
+        target: 'ws://localhost:3001',
         ws: true
       }
     },

@@ -24,47 +24,32 @@ export function Chat() {
     // Initialize WebSocket connection
     const initSocket = () => {
       try {
-        // Use relative path for WebSocket connection, automatically adapting to different hosts and ports
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}/ws`;
-        console.log(`Attempting to connect WebSocket: ${wsUrl}`);
+        // 使用正確的WebSocket連接路徑
+        const wsUrl = 'ws://localhost:3001/ws';
+        console.log(`嘗試連接WebSocket: ${wsUrl}`);
         
         const ws = new WebSocket(wsUrl);
         
         ws.onopen = () => {
-          console.log("WebSocket connection successfully established");
+          console.log("WebSocket連接成功建立");
           socketRef.current = ws;
         };
         
         ws.onerror = (error) => {
-          console.error("WebSocket connection error:", error);
-          // Try using absolute path when encountering errors
-          if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
-            console.log("Attempting to use fallback connection");
-            const fallbackWs = new WebSocket("ws://localhost:5000/ws");
-            
-            fallbackWs.onopen = () => {
-              console.log("Fallback WebSocket connection successfully established");
-              socketRef.current = fallbackWs;
-            };
-            
-            fallbackWs.onerror = (fbError) => {
-              console.error("Fallback WebSocket connection also failed:", fbError);
-            };
-          }
+          console.error("WebSocket連接錯誤:", error);
         };
         
         ws.onclose = () => {
-          console.log("WebSocket connection closed");
+          console.log("WebSocket連接關閉");
           socketRef.current = null;
-          // Add reconnection logic here
+          // 重連邏輯
           setTimeout(() => {
-            console.log("Attempting to reconnect...");
+            console.log("嘗試重新連接...");
             initSocket();
           }, 3000);
         };
       } catch (error) {
-        console.error("Error establishing WebSocket connection:", error);
+        console.error("建立WebSocket連接時出錯:", error);
       }
     };
     

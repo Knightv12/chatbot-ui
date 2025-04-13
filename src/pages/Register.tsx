@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ThemeToggle } from '@/components/custom/theme-toggle';
 import { Eye, EyeOff } from 'lucide-react';
+import { RegistrationHelper } from '@/components/custom/registration-helper';
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -12,6 +13,7 @@ const Register = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showHelper, setShowHelper] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -40,10 +42,10 @@ const Register = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
-            Create a new account
+            Create your account
           </h2>
           <p className="mt-2 text-center text-sm text-muted-foreground">
-            Fill in the information below to create your account
+            Join us and start learning or teaching
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -91,7 +93,7 @@ const Register = () => {
                 type={showPassword ? "text" : "password"}
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-input bg-background placeholder-muted-foreground text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                placeholder="Password (minimum 6 characters)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -142,6 +144,22 @@ const Register = () => {
           >
             Already have an account? Sign in
           </Link>
+        </div>
+        
+        <div className="pt-8 border-t">
+          <button
+            type="button"
+            onClick={() => setShowHelper(!showHelper)}
+            className="text-sm text-muted-foreground hover:text-foreground underline w-full text-center"
+          >
+            {showHelper ? 'Hide registration helper' : 'Show registration helper'}
+          </button>
+          
+          {showHelper && (
+            <div className="mt-4">
+              <RegistrationHelper />
+            </div>
+          )}
         </div>
       </div>
     </div>

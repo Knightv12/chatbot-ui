@@ -20,3 +20,10 @@ export interface Review {
   rating: number;
   createdAt: string;
 }
+
+export interface TeacherStudent {
+  _id: string;
+  teacher: User | string;
+  student: User | string;
+  createdAt: string;
+}

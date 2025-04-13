@@ -145,7 +145,7 @@ const StudentProgress = () => {
         const result = await teacherStudentAPI.getTeacherStudents(user.id);
         setStudents(result.students);
         
-        // 獲取所有學生的評論
+        // Get reviews for all students
         const reviewsMap: Record<string, Review[]> = {};
         for (const student of result.students) {
           const reviewResult = await reviewsAPI.getStudentReviews(student.id);
@@ -154,10 +154,10 @@ const StudentProgress = () => {
         setReviews(reviewsMap);
       } catch (err) {
         console.error('Error fetching students:', err);
-        // 使用示例數據
+        // Use sample data as fallback
         setStudents(sampleStudents);
         setReviews(generateSampleReviews());
-        setError(null); // 清除錯誤，因為我們使用了示例數據
+        setError(null); // Clear error since we're using sample data
       } finally {
         setIsLoading(false);
       }
@@ -167,7 +167,7 @@ const StudentProgress = () => {
   }, [user]);
 
   const handleSubmitReview = async () => {
-    if (!user || !selectedStudent) return;
+    if (!selectedStudent || !user) return;
     
     if (!reviewContent.trim()) {
       toast.error('Review content cannot be empty');
@@ -178,26 +178,33 @@ const StudentProgress = () => {
     
     try {
       if (editingReview) {
-        // 更新評論
-        await reviewsAPI.updateReview(editingReview._id, {
-          content: reviewContent,
-          rating
-        });
-        
-        toast.success('Review updated successfully');
-        
-        // 更新本地評論列表
-        const updatedReviews = {...reviews};
-        updatedReviews[selectedStudent.id] = updatedReviews[selectedStudent.id].map(review => 
-          review._id === editingReview._id 
-            ? {...review, content: reviewContent, rating} 
-            : review
-        );
-        setReviews(updatedReviews);
-        
-        setEditingReview(null);
+        // Update existing review
+        try {
+          const result = await reviewsAPI.updateReview(editingReview._id, {
+            content: reviewContent,
+            rating
+          });
+          
+          toast.success('Review updated successfully');
+          
+          // Update local reviews list
+          const updatedReviews = {...reviews};
+          const reviewIndex = updatedReviews[selectedStudent.id].findIndex(
+            r => r._id === editingReview._id
+          );
+          
+          if (reviewIndex !== -1) {
+            updatedReviews[selectedStudent.id][reviewIndex] = result.review;
+            setReviews(updatedReviews);
+          }
+          
+          setEditingReview(null);
+        } catch (err) {
+          console.error('Error updating review:', err);
+          toast.error('Failed to update review. Please try again.');
+        }
       } else {
-        // 創建新評論
+        // Create new review
         try {
           const result = await reviewsAPI.createReview({
             teacherId: user.id,
@@ -208,7 +215,7 @@ const StudentProgress = () => {
           
           toast.success('Review added successfully');
           
-          // 更新本地評論列表
+          // Update local reviews list
           const updatedReviews = {...reviews};
           updatedReviews[selectedStudent.id] = [
             result.review,
@@ -216,7 +223,9 @@ const StudentProgress = () => {
           ];
           setReviews(updatedReviews);
         } catch (err) {
-          // API失敗的情況下，創建一個模擬的新評論
+          console.error('Error creating review:', err);
+          
+          // Create a mock review if API fails
           const mockReview: Review = {
             _id: `mock-${Date.now()}`,
             teacher: {
@@ -231,9 +240,9 @@ const StudentProgress = () => {
             createdAt: new Date().toISOString()
           };
           
-          toast.success('Review added successfully');
+          toast.success('Review added successfully (offline mode)');
           
-          // 更新本地評論列表
+          // Update local reviews list
           const updatedReviews = {...reviews};
           updatedReviews[selectedStudent.id] = [
             mockReview,
@@ -243,7 +252,7 @@ const StudentProgress = () => {
         }
       }
       
-      // 重置表單
+      // Reset form
       setReviewContent('');
       setRating(5);
     } catch (err) {
@@ -265,15 +274,16 @@ const StudentProgress = () => {
     
     try {
       await reviewsAPI.deleteReview(reviewId);
-      
       toast.success('Review deleted successfully');
       
-      // 更新本地評論列表
+      // Update local reviews list
       const updatedReviews = {...reviews};
-      updatedReviews[studentId] = updatedReviews[studentId].filter(review => review._id !== reviewId);
+      updatedReviews[studentId] = updatedReviews[studentId].filter(
+        r => r._id !== reviewId
+      );
       setReviews(updatedReviews);
       
-      // 如果正在編輯該評論，重置表單
+      // Reset form if editing the deleted review
       if (editingReview && editingReview._id === reviewId) {
         setEditingReview(null);
         setReviewContent('');
@@ -285,20 +295,34 @@ const StudentProgress = () => {
     }
   };
 
-  // 渲染評分星星選擇器
-  const StarRating = () => {
+  const renderStars = (rating: number) => {
     return (
-      <div className="flex items-center mb-4">
-        <span className="mr-2">Rating:</span>
-        <div className="flex">
-          {[1, 2, 3, 4, 5].map((value) => (
-            <Star 
-              key={value} 
-              className={`h-6 w-6 cursor-pointer ${value <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
-              onClick={() => setRating(value)}
-            />
-          ))}
-        </div>
+      <div className="flex space-x-1">
+        {[...Array(5)].map((_, i) => (
+          <Star 
+            key={i} 
+            className={`h-5 w-5 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
+          />
+        ))}
+      </div>
+    );
+  };
+
+  const renderRatingSelector = () => {
+    return (
+      <div className="flex items-center space-x-1 mb-4">
+        <span className="text-sm mr-2">Rating:</span>
+        {[...Array(5)].map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => setRating(i + 1)}
+            className={`h-7 w-7 rounded-full flex items-center justify-center transition-colors 
+              ${i < rating ? 'text-yellow-400 hover:text-yellow-500' : 'text-gray-300 hover:text-gray-400'}`}
+          >
+            <Star className={i < rating ? 'fill-yellow-400' : ''} size={20} />
+          </button>
+        ))}
       </div>
     );
   };
@@ -308,147 +332,149 @@ const StudentProgress = () => {
       <LeftSidebar />
       <Header user={user} onLogout={logout} />
       
-      <div className="flex-1 p-6 overflow-auto">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl font-bold mb-6">Student Progress</h1>
-          
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-          ) : error ? (
-            <div className="text-red-500 text-center py-8">{error}</div>
-          ) : students.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              You don't have any students yet.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {/* 學生列表 */}
-              <div className="md:col-span-1 bg-card p-4 rounded-lg border h-fit">
-                <h2 className="font-medium mb-4">Your Students</h2>
-                <div className="space-y-2">
-                  {students.map((student) => (
-                    <div 
-                      key={student.id} 
-                      className={`p-3 rounded-md cursor-pointer ${selectedStudent?.id === student.id 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'hover:bg-muted'}`}
-                      onClick={() => setSelectedStudent(student)}
+      <div className="flex h-full overflow-hidden">
+        {/* Students list sidebar */}
+        <div className="w-64 border-r border-border bg-card overflow-y-auto">
+          <div className="p-4">
+            <h2 className="font-medium text-lg mb-4">Your Students</h2>
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+            ) : students.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                You don't have any students yet.
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {students.map((student) => (
+                  <li key={student.id}>
+                    <button
+                      className={`w-full text-left p-2 rounded-md transition-colors ${
+                        selectedStudent?.id === student.id 
+                          ? 'bg-primary/10 text-primary' 
+                          : 'hover:bg-secondary/50'
+                      }`}
+                      onClick={() => {
+                        setSelectedStudent(student);
+                        setEditingReview(null);
+                        setReviewContent('');
+                        setRating(5);
+                      }}
                     >
-                      <p className="font-medium">{student.username}</p>
-                      <p className="text-xs truncate">{student.email}</p>
-                    </div>
-                  ))}
+                      <div className="font-medium">{student.username}</div>
+                      <div className="text-xs text-muted-foreground truncate">{student.email}</div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+        
+        {/* Main content area */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {selectedStudent ? (
+            <div>
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold mb-1">{selectedStudent.username}</h1>
+                <p className="text-muted-foreground">{selectedStudent.email}</p>
+              </div>
+              
+              {/* Review form */}
+              <div className="bg-card p-6 rounded-lg border mb-8">
+                <h2 className="text-xl font-semibold mb-4">
+                  {editingReview ? 'Edit Review' : 'Add New Review'}
+                </h2>
+                
+                {renderRatingSelector()}
+                
+                <Textarea
+                  placeholder="Write your feedback for this student..."
+                  className="min-h-32 mb-4"
+                  value={reviewContent}
+                  onChange={(e) => setReviewContent(e.target.value)}
+                />
+                
+                <div className="flex space-x-3">
+                  <Button 
+                    onClick={handleSubmitReview} 
+                    disabled={isSubmitting || !reviewContent.trim()}
+                    className="flex-1"
+                  >
+                    {isSubmitting ? 
+                      'Submitting...' : 
+                      editingReview ? 'Update Review' : 'Add Review'
+                    }
+                  </Button>
+                  
+                  {editingReview && (
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setEditingReview(null);
+                        setReviewContent('');
+                        setRating(5);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  )}
                 </div>
               </div>
               
-              {/* 學生詳情和評論 */}
-              <div className="md:col-span-3">
-                {selectedStudent ? (
-                  <div>
-                    <div className="bg-card p-6 rounded-lg border mb-6">
-                      <h2 className="text-xl font-medium mb-4">{selectedStudent.username}</h2>
-                      <p className="text-muted-foreground mb-2">{selectedStudent.email}</p>
-                      
-                      {/* 添加/編輯評論表單 */}
-                      <div className="mt-6 border-t pt-4">
-                        <h3 className="font-medium mb-3">
-                          {editingReview ? 'Edit Review' : 'Add New Review'}
-                        </h3>
+              {/* Reviews list */}
+              <h2 className="text-xl font-semibold mb-4">Previous Reviews</h2>
+              
+              {!reviews[selectedStudent.id] || reviews[selectedStudent.id].length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No reviews yet for this student.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {reviews[selectedStudent.id].map((review) => (
+                    <div 
+                      key={review._id} 
+                      className={`bg-card p-5 rounded-lg border ${
+                        editingReview?._id === review._id ? 'ring-2 ring-primary' : ''
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex space-x-2 items-center">
+                          {renderStars(review.rating)}
+                          <span className="text-sm text-muted-foreground">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
                         
-                        <StarRating />
-                        
-                        <Textarea
-                          placeholder="Write your review about this student's progress..."
-                          value={reviewContent}
-                          onChange={(e) => setReviewContent(e.target.value)}
-                          rows={4}
-                          className="mb-4"
-                        />
-                        
-                        <div className="flex gap-3">
-                          <Button 
-                            onClick={handleSubmitReview}
-                            disabled={isSubmitting}
+                        <div className="flex space-x-1">
+                          <button
+                            onClick={() => handleEditReview(review)}
+                            className="p-1 text-muted-foreground hover:text-foreground"
+                            title="Edit review"
                           >
-                            {isSubmitting 
-                              ? 'Submitting...' 
-                              : editingReview ? 'Update Review' : 'Add Review'
-                            }
-                          </Button>
-                          
-                          {editingReview && (
-                            <Button 
-                              variant="outline"
-                              onClick={() => {
-                                setEditingReview(null);
-                                setReviewContent('');
-                                setRating(5);
-                              }}
-                            >
-                              Cancel
-                            </Button>
-                          )}
+                            <Edit size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteReview(review._id, selectedStudent.id)}
+                            className="p-1 text-muted-foreground hover:text-red-500"
+                            title="Delete review"
+                          >
+                            <Trash2 size={16} />
+                          </button>
                         </div>
                       </div>
+                      
+                      <p className="whitespace-pre-line text-sm">{review.content}</p>
                     </div>
-                    
-                    {/* 評論列表 */}
-                    <h3 className="font-medium mb-4">Reviews</h3>
-                    
-                    {reviews[selectedStudent.id]?.length > 0 ? (
-                      <div className="space-y-4">
-                        {reviews[selectedStudent.id].map((review) => (
-                          <div key={review._id} className="bg-card p-4 rounded-lg border">
-                            <div className="flex justify-between mb-2">
-                              <div className="flex items-center">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star 
-                                    key={i} 
-                                    className={`h-4 w-4 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
-                                  />
-                                ))}
-                                <span className="text-sm ml-2 text-muted-foreground">
-                                  {new Date(review.createdAt).toLocaleDateString()}
-                                </span>
-                              </div>
-                              
-                              <div className="flex gap-2">
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon"
-                                  onClick={() => handleEditReview(review)}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon"
-                                  className="text-red-500"
-                                  onClick={() => handleDeleteReview(review._id, selectedStudent.id)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                            
-                            <p className="whitespace-pre-line">{review.content}</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4 text-gray-500 bg-card rounded-lg border">
-                        No reviews yet for this student.
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500 bg-card rounded-lg border">
-                    Select a student to view details and manage reviews.
-                  </div>
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+              <p className="text-lg mb-2">Select a student from the list</p>
+              <p className="text-sm">to view or add reviews</p>
             </div>
           )}
         </div>

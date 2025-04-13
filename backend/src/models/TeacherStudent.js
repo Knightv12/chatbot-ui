@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const reviewSchema = mongoose.Schema(
+const teacherStudentSchema = mongoose.Schema(
   {
     teacher: {
       type: mongoose.Schema.Types.ObjectId,
@@ -12,22 +12,15 @@ const reviewSchema = mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    content: {
-      type: String,
-      required: true,
-    },
-    rating: {
-      type: Number,
-      min: 1,
-      max: 5,
-      default: 5,
-    },
   },
   {
     timestamps: true,
   }
 );
 
-const Review = mongoose.model('Review', reviewSchema);
+// 確保一個學生只能有一個老師
+teacherStudentSchema.index({ student: 1 }, { unique: true });
 
-module.exports = Review; 
+const TeacherStudent = mongoose.model('TeacherStudent', teacherStudentSchema);
+
+module.exports = TeacherStudent; 

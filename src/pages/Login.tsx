@@ -21,7 +21,8 @@ const Login = () => {
       await login(email, password);
       navigate('/chat');
     } catch (err) {
-      setError('Login failed, please check your email and password');
+      setError('Login failed. Please check your email and password.');
+      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -113,32 +114,16 @@ const Login = () => {
               {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
-          
-          {/* 快速測試按鈕 */}
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={() => {
-                setEmail('test@example.com');
-                setPassword('password123');
-              }}
-              className="w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              填充測試用戶
-            </button>
-          </div>
         </form>
         <div className="text-center">
           <Link
             to="/register"
             className="font-medium text-primary hover:text-primary/90"
           >
-            Don't have an account? Sign up
+            Don't have an account? Register now
           </Link>
         </div>
-
-        {/* API 連接測試 */}
-        <div className="mt-6">
+        <div className="mt-8">
           <TestApiButton />
         </div>
       </div>
