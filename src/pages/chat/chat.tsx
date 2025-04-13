@@ -18,7 +18,7 @@ export function Chat() {
   const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const { user, logout } = useAuth();
-  const { currentChat, sendMessage, chats, setCurrentChat } = useChat();
+  const { sendMessage } = useChat();
 
   useEffect(() => {
     // Initialize WebSocket connection

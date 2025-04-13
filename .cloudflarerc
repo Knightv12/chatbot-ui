@@ -1,0 +1,7 @@
+[build]
+  command = "bash cloudflare-build.sh"
+  base = "/"
+  publish = "/dist"
+
+[build.environment]
+  NODE_VERSION = "18.18.0" 

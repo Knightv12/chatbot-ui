@@ -52,7 +52,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Update current chat
       if (currentChat) {
-        const updatedChat = {
+        const updatedChat: Chat = {
           ...currentChat,
           messages: [
             ...currentChat.messages,

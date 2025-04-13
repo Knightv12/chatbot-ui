@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { teacherStudentAPI, reviewsAPI } from '@/lib/api';
 import { User, Review } from '@/interfaces/interfaces';
@@ -6,7 +6,7 @@ import { Header } from '@/components/custom/header';
 import LeftSidebar from '@/components/custom/mainleftsidebar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Star, Plus, Edit, Trash2 } from 'lucide-react';
+import { Star, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const StudentProgress = () => {
