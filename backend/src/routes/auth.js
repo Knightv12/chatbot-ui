@@ -62,9 +62,24 @@ router.post('/register', async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
 
+    // 數據驗證
+    if (!username || !email || !password || !role) {
+      console.log('Missing required fields:', { username, email, role });
+      return res.status(400).json({ 
+        message: 'All fields are required',
+        received: { username: !!username, email: !!email, password: !!password, role: !!role }
+      });
+    }
+
+    // 檢查角色是否有效
+    if (role !== 'teacher' && role !== 'student') {
+      return res.status(400).json({ message: 'Invalid role. Must be "teacher" or "student"' });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
+      console.log('User already exists:', email);
       return res.status(400).json({ message: 'User already exists' });
     }
 
@@ -77,11 +92,12 @@ router.post('/register', async (req, res) => {
     });
 
     await user.save();
+    console.log('User created successfully:', email);
 
     // Generate JWT token
     const token = jwt.sign(
       { userId: user._id, role: user.role },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'your-default-secret-key',
       { expiresIn: '24h' }
     );
 
@@ -95,7 +111,12 @@ router.post('/register', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Registration error:', error);
+    res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
@@ -103,26 +124,38 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    
+    // 數據驗證
+    if (!email || !password) {
+      console.log('Missing login fields:', { email: !!email, password: !!password });
+      return res.status(400).json({ 
+        message: 'Email and password are required',
+        received: { email: !!email, password: !!password }
+      });
+    }
 
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
+      console.log('User not found:', email);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      console.log('Invalid password for user:', email);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     // Generate JWT token
     const token = jwt.sign(
       { userId: user._id, role: user.role },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'your-default-secret-key',
       { expiresIn: '24h' }
     );
 
+    console.log('User logged in successfully:', email);
     res.json({
       token,
       user: {
@@ -133,7 +166,12 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Login error:', error);
+    res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

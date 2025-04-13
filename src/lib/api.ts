@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-// 使用相對路徑，這樣就不需要硬編碼服務器地址
-const API_URL = '/api';
+// 修改為使用絕對 URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+console.log('Using API URL:', API_URL);
 
 // 創建 axios 實例
 const api = axios.create({
@@ -9,6 +11,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // 啟用跨域 Cookie
 });
 
 // 請求攔截器，添加 token

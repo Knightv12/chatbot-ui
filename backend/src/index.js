@@ -16,9 +16,13 @@ const app = express();
 
 // CORS settings
 const corsOptions = {
-  origin: ['http://localhost:8501', 'http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:8501', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'], // 允許多個前端地址
+  origin: function(origin, callback) {
+    // 允許所有來源，包括無來源的請求（如 Postman）
+    callback(null, true);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 };
 
 app.use(cors(corsOptions));
@@ -31,7 +35,15 @@ const wss = new WebSocket.Server({
   server,
   path: '/ws',
   cors: {
-    origin: ['http://localhost:8501', 'http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:8501', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'],
+    origin: [
+      'http://localhost:8501', 
+      'http://localhost:3000', 
+      'http://localhost:5173', 
+      'http://127.0.0.1:8501', 
+      'http://127.0.0.1:3000', 
+      'http://127.0.0.1:5173',
+      'https://chatbot-ui-c03.pages.dev' // 添加 Cloudflare Pages 網站
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
   }
 });
@@ -102,6 +114,15 @@ wss.on('connection', async (ws, req) => {
 
 // Express middleware
 app.use(express.json());
+
+// 添加健康檢查端點
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    message: '後端伺服器正在運行', 
+    timestamp: new Date().toISOString() 
+  });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
