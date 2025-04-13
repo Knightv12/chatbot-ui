@@ -12,10 +12,13 @@ export function TestApiButton() {
     setError(null);
     
     try {
+      // 使用環境變數中的 API URL
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      
       // 使用簡單的 GET 請求來檢查連接
       const response = await axios({
         method: 'get',
-        url: 'http://localhost:5000/api/auth/check-user', // 使用絕對路徑
+        url: `${apiUrl}/auth/check-user`, // 使用環境變數
         params: { email: 'test@example.com' },
         withCredentials: true,
         timeout: 10000, // 10 秒超時
@@ -151,8 +154,12 @@ export function TestApiButton() {
     setError(null);
     
     try {
+      // 使用環境變數中的基礎 URL
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const healthUrl = baseUrl.replace('/api', '/health');
+      
       // 直接使用 fetch 而不是 axios
-      const response = await fetch('http://localhost:5000/health', {
+      const response = await fetch(healthUrl, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -178,7 +185,7 @@ export function TestApiButton() {
       
       setResult(JSON.stringify({
         message: err.message,
-        error: '無法連接到後端伺服器，請確保後端已啟動並運行在 http://localhost:5000'
+        error: '無法連接到後端伺服器，請檢查網絡連接或聯繫管理員'
       }, null, 2));
     } finally {
       setIsLoading(false);

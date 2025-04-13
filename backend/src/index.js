@@ -17,8 +17,25 @@ const app = express();
 // CORS settings
 const corsOptions = {
   origin: function(origin, callback) {
-    // 允許所有來源，包括無來源的請求（如 Postman）
-    callback(null, true);
+    // 允許來自 Cloudflare Pages 和本地開發環境的請求
+    const allowedOrigins = [
+      'https://chatbot-ui-c03.pages.dev',  // Cloudflare Pages
+      'https://fypclass.pages.dev',        // 如有其他 Cloudflare 域名
+      'http://localhost:8501',             // 本地開發前端
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'http://127.0.0.1:8501',
+      'http://127.0.0.1:5173',
+      'http://127.0.0.1:3000'
+    ];
+    
+    // 檢查來源是否在允許列表中或為空（如 Postman）
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('CORS 已拒絕來源:', origin);
+      callback(null, false);
+    }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
@@ -36,13 +53,14 @@ const wss = new WebSocket.Server({
   path: '/ws',
   cors: {
     origin: [
+      'https://chatbot-ui-c03.pages.dev', // Cloudflare Pages 
+      'https://fypclass.pages.dev',       // 如有其他 Cloudflare 域名
       'http://localhost:8501', 
       'http://localhost:3000', 
       'http://localhost:5173', 
       'http://127.0.0.1:8501', 
       'http://127.0.0.1:3000', 
-      'http://127.0.0.1:5173',
-      'https://chatbot-ui-c03.pages.dev' // 添加 Cloudflare Pages 網站
+      'http://127.0.0.1:5173'
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
   }
