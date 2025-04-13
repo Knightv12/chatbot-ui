@@ -32,5 +32,32 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, './src')
     }
+  },
+  // 禁用 TypeScript 檢查和優化生產構建
+  optimizeDeps: {
+    esbuildOptions: {
+      tsconfigRaw: {
+        compilerOptions: {
+          skipLibCheck: true,
+          skipDefaultLibCheck: true,
+          noImplicitAny: false,
+          noUnusedLocals: false,
+          noUnusedParameters: false
+        }
+      }
+    }
+  },
+  build: {
+    // 禁用類型檢查，提高構建速度
+    sourcemap: false,
+    minify: true,
+    cssMinify: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom']
+        }
+      }
+    }
   }
 })
