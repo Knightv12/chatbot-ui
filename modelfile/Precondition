@@ -1,0 +1,3 @@
+The model file need to use the ollama create tutor -f {file location} to make the model
+file location is the location of Modelfile1
+For some reason the newer versions of ollama removed the ability to use the ollama.create() fx directly, see if there is methods to access Modelfile1

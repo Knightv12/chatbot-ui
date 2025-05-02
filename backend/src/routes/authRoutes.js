@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser, getUserProfile } = require('../controllers/authController');
+const { registerUser, loginUser, getUserProfile, updateUser } = require('../controllers/authController');
 const { connectStudentToTeacher, getTeacherStudents, getStudentTeacher } = require('../controllers/teacherStudentController');
 const { protect, teacherOnly } = require('../middleware/authMiddleware');
 
@@ -10,8 +10,11 @@ router.post('/register', registerUser);
 // 用戶登錄
 router.post('/login', loginUser);
 
-// 獲取用戶資料
+// 獲取用戶個人資料
 router.get('/profile', protect, getUserProfile);
+
+// 更新用戶資料
+router.put('/update-user', protect, updateUser);
 
 // 將學生連接到老師
 router.post('/connect', protect, teacherOnly, connectStudentToTeacher);

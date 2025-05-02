@@ -15,14 +15,14 @@ interface ChatInputProps {
 
 const suggestedActions = [
     {
-        title: 'How is the weather',
-        label: 'in Vienna?',
-        action: 'How is the weather in Vienna today?',
+        title: 'How to solve trigonometry',
+        label: 'e.g., sin²θ + cos²θ = 1',
+        action: 'Can you help me prove the trigonometric identity sin²θ + cos²θ = 1?',
     },
     {
-        title: 'Tell me a fun fact',
-        label: 'about pandas',
-        action: 'Tell me an interesting fact about pandas',
+        title: 'How to solve quadratic equations',
+        label: 'e.g., ax² + bx + c = 0',
+        action: 'Can you teach me how to solve quadratic equations in the form ax² + bx + c = 0?',
     },
 ];
 

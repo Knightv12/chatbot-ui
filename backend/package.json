@@ -1,28 +1,27 @@
 {
   "name": "chatbot-ui-backend",
   "version": "1.0.0",
-  "description": "Backend for Chatbot UI with Express.js",
+  "description": "Backend for Chatbot UI",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon src/index.js"
   },
   "dependencies": {
-    "axios": "^1.8.4",
+    "@langchain/community": "^0.0.27",
+    "@langchain/core": "^0.1.23",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
     "express-async-handler": "^1.2.0",
-    "express-validator": "^7.0.1",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.2.3",
+    "jsonwebtoken": "^9.0.0",
+    "langchain": "^0.1.9",
+    "mongoose": "^7.0.3",
     "morgan": "^1.10.0",
-    "validator": "^13.11.0",
-    "ws": "^8.18.1"
+    "ws": "^8.13.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "nodemon": "^2.0.22"
   }
-} 
+}

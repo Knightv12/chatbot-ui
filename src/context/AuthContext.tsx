@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authAPI } from '../lib/api';
+import { authAPI } from '../api/auth';
 
 interface User {
   _id: string;
@@ -20,6 +20,7 @@ interface AuthContextType {
   verifyResetToken: (token: string) => Promise<boolean>;
   isAuthenticated: boolean;
   isLoading: boolean;
+  updateUser: (userData: Partial<User>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -133,6 +134,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateUser = async (userData: Partial<User>) => {
+    try {
+      const response = await authAPI.updateUser(userData);
+      if (response && response.user) {
+        const updatedUser = {
+          ...user,
+          ...response.user,
+          id: response.user._id
+        };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Update user error:', error);
+      throw error;
+    }
+  };
+
   // Check if token is valid
   useEffect(() => {
     const checkToken = async () => {
@@ -161,7 +180,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         resetPassword,
         verifyResetToken,
         isAuthenticated: !!token,
-        isLoading
+        isLoading,
+        updateUser
       }}
     >
       {children}

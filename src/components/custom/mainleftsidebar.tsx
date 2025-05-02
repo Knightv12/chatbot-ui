@@ -32,6 +32,10 @@ export default function MainLeftSidebar() {
     navigate('/student-progress');
   };
 
+  const handleSettings = () => {
+    navigate('/settings');
+  };
+
   return (
     <div className="relative">
       {/* Toggle button */}
@@ -69,7 +73,7 @@ export default function MainLeftSidebar() {
               <Home className="h-4 w-4" />
               Home
             </Button>
-            <Button variant="ghost" className="w-full justify-start gap-2">
+            <Button variant="ghost" className="w-full justify-start gap-2" onClick={handleSettings}>
               <Settings className="h-4 w-4" />
               Settings
             </Button>

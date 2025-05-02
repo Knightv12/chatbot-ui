@@ -43,7 +43,7 @@ try {
 } catch (error) {
   console.error('Build failed:', error);
   
-  // 即使在錯誤的情況下，也要創建一個最小的構建輸出
+  // Create a minimal build output even in case of error
   console.log('Creating minimal build output...');
   if (!fs.existsSync('dist')) {
     fs.mkdirSync('dist', { recursive: true });

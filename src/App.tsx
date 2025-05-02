@@ -11,6 +11,7 @@ import { Chat } from './pages/chat/chat';
 import Reviews from './pages/Reviews';
 import StudentProgress from './pages/StudentProgress';
 import { useAuth } from './context/AuthContext';
+import Settings from './pages/Settings';
 
 // 保護路由組件
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -59,6 +60,7 @@ function App() {
             <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
             <Route path="/student-progress" element={<TeacherRoute><StudentProgress /></TeacherRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/chat" />} />
           </Routes>
         </ChatProvider>

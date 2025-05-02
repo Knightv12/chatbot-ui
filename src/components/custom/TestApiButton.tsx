@@ -13,13 +13,12 @@ export function TestApiButton() {
     
     try {
       // 使用環境變數中的 API URL
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       
-      // 使用簡單的 GET 請求來檢查連接
+      // 使用根路由來檢查連接
       const response = await axios({
         method: 'get',
-        url: `${apiUrl}/auth/check-user`, // 使用環境變數
-        params: { email: 'test@example.com' },
+        url: apiUrl, // 使用根路由
         withCredentials: true,
         timeout: 15000, // 15 秒超時
         headers: {
@@ -28,18 +27,22 @@ export function TestApiButton() {
         }
       });
       
-      setResult(JSON.stringify(response.data, null, 2));
+      setResult(JSON.stringify({
+        status: 'success',
+        message: 'API connection successful!',
+        data: response.data
+      }, null, 2));
     } catch (err: any) {
-      console.error('API 測試詳細錯誤:', err);
+      console.error('API test detailed error:', err);
       
-      // 顯示完整的錯誤詳情
+      // Display complete error details
       const errorDetails = {
         message: err.message,
         status: err.response?.status,
         data: err.response?.data
       };
       
-      setError(err.message || '請求失敗');
+      setError(err.message || 'Request failed');
       setResult(JSON.stringify(errorDetails, null, 2));
     } finally {
       setIsLoading(false);
@@ -51,39 +54,41 @@ export function TestApiButton() {
     setError(null);
     
     try {
-      // 從 VITE_API_URL 解析出基礎 URL
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-      const baseUrl = apiUrl.replace('/api', '');
+      // 使用環境變數中的 API URL
+      const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
       
-      // 使用 Fetch API 而不是 axios
-      const response = await fetch(`${baseUrl}/api/auth/login`, {
-        method: 'POST',
+      // 使用測試用戶憑證進行登入測試
+      const response = await axios({
+        method: 'post',
+        url: `${apiUrl}/auth/login`,
+        data: {
+          email: 'stephenshum2001@yahoo.com.hk',
+          password: 'FYP43214321'
+        },
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          email: 'teacher@example.com',
-          password: 'password123'
-        })
+        withCredentials: true // 添加這個選項以支持跨域認證
       });
       
-      // 將 Response 轉換為 JSON
-      const data = await response.json();
-      
       setResult(JSON.stringify({
-        status: response.status,
-        statusText: response.statusText,
-        data: data
+        status: 'success',
+        message: 'Login function test successful!',
+        data: response.data
       }, null, 2));
     } catch (err: any) {
-      console.error('直接測試錯誤:', err);
-      setError(`直接測試後端失敗: ${err.message}`);
+      console.error('Login test error:', err);
+      setError(`Login test failed: ${err.message}`);
       
-      setResult(JSON.stringify({
+      const errorDetails = {
         error: err.message,
+        status: err.response?.status,
+        data: err.response?.data,
         time: new Date().toISOString()
-      }, null, 2));
+      };
+      
+      setResult(JSON.stringify(errorDetails, null, 2));
     } finally {
       setIsLoading(false);
     }
@@ -116,10 +121,10 @@ export function TestApiButton() {
       
       setResult(JSON.stringify(response.data, null, 2));
     } catch (err: any) {
-      console.error('創建用戶錯誤:', err);
-      setError(`創建測試用戶失敗: ${err.message}`);
+      console.error('Create user error:', err);
+      setError(`Failed to create test user: ${err.message}`);
       
-      // 顯示詳細錯誤
+      // Display detailed error
       const errorDetails = {
         message: err.message,
         status: err.response?.status,
@@ -139,13 +144,12 @@ export function TestApiButton() {
     
     try {
       // 使用環境變數中的基礎 URL
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-      const healthUrl = baseUrl.replace('/api', '/health');
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       
-      console.log('嘗試連接健康檢查端點:', healthUrl);
+      console.log('Attempting to connect to backend server:', baseUrl);
       
-      // 直接使用 fetch 而不是 axios
-      const response = await fetch(healthUrl, {
+      // Use fetch directly instead of axios
+      const response = await fetch(baseUrl, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -155,25 +159,25 @@ export function TestApiButton() {
       if (response.ok) {
         const data = await response.json();
         setResult(JSON.stringify({
-          message: '伺服器正在運行！',
+          message: 'Backend server is running!',
           status: response.status,
           statusText: response.statusText,
           data: data
         }, null, 2));
       } else {
         setResult(JSON.stringify({
-          message: '伺服器返回錯誤',
+          message: 'Server returned an error',
           status: response.status,
           statusText: response.statusText
         }, null, 2));
       }
     } catch (err: any) {
-      console.error('伺服器連接錯誤:', err);
-      setError('伺服器未運行或無法連接: ' + err.message);
+      console.error('Server connection error:', err);
+      setError('Unable to connect to backend server: ' + err.message);
       
       setResult(JSON.stringify({
         message: err.message,
-        error: '無法連接到後端伺服器，請檢查網絡連接或聯繫管理員'
+        error: 'Unable to connect to backend server, please check your network connection or contact administrator'
       }, null, 2));
     } finally {
       setIsLoading(false);
@@ -182,21 +186,21 @@ export function TestApiButton() {
 
   return (
     <div className="p-4 border rounded-md">
-      <h3 className="text-lg font-medium mb-2">API 連接測試</h3>
+      <h3 className="text-lg font-medium mb-2">API Connection Test</h3>
       <div className="flex flex-wrap gap-2 mb-4">
         <Button 
           onClick={testServerRunning} 
           disabled={isLoading}
           className="bg-green-600 hover:bg-green-700"
         >
-          檢查伺服器是否運行
+          Check Server Status
         </Button>
         
         <Button 
           onClick={testApi} 
           disabled={isLoading}
         >
-          測試 API 連接
+          Test API Connection
         </Button>
         
         <Button 
@@ -204,7 +208,7 @@ export function TestApiButton() {
           disabled={isLoading}
           variant="outline"
         >
-          測試登入功能
+          Test Login Function
         </Button>
         
         <Button 
@@ -212,21 +216,21 @@ export function TestApiButton() {
           disabled={isLoading}
           variant="secondary"
         >
-          創建測試用戶
+          Create Test User
         </Button>
       </div>
       
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-800 rounded-md">
-          <p className="font-medium">錯誤:</p>
+          <p className="font-medium">Error:</p>
           <p>{error}</p>
         </div>
       )}
       
       {result && (
         <div className="mt-4">
-          <p className="font-medium mb-2">回應:</p>
-          <pre className="p-3 bg-gray-100 text-xs overflow-auto rounded-md max-h-60">
+          <p className="font-medium mb-2">Response:</p>
+          <pre className="p-3 bg-muted text-foreground text-xs overflow-auto rounded-md max-h-60">
             {result}
           </pre>
         </div>

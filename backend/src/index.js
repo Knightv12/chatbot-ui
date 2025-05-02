@@ -31,7 +31,7 @@ app.use(cors({
 
 // 基本路由
 app.get('/', (req, res) => {
-  res.json({ message: '歡迎使用 Chatbot API' });
+  res.json({ message: 'Welcome to Chatbot API' });
 });
 
 // API 路由
