@@ -12,8 +12,10 @@ export function TestApiButton() {
     setError(null);
     
     try {
-      // 使用環境變數中的 API URL
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      // 使用環境變數中的 API URL 中的基礎部分，不包括 /api
+      const apiUrl = import.meta.env.VITE_API_URL 
+        ? import.meta.env.VITE_API_URL.replace('/api', '') 
+        : 'http://localhost:3001';
       
       // 使用根路由來檢查連接
       const response = await axios({
@@ -54,8 +56,8 @@ export function TestApiButton() {
     setError(null);
     
     try {
-      // 使用環境變數中的 API URL
-      const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
+      // 直接使用環境變數中的 API URL 而不添加額外的 /api
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
       
       // 使用測試用戶憑證進行登入測試
       const response = await axios({
@@ -99,7 +101,7 @@ export function TestApiButton() {
     setError(null);
     
     try {
-      // 從 VITE_API_URL 解析出基礎 URL
+      // 直接使用環境變數中的 API URL 而不添加額外的 /api
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
       
       // 使用 AJAX 呼叫註冊端點
@@ -143,8 +145,10 @@ export function TestApiButton() {
     setError(null);
     
     try {
-      // 使用環境變數中的基礎 URL
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      // 使用環境變數中的基礎 URL 的基礎部分，不包括 /api
+      const baseUrl = import.meta.env.VITE_API_URL 
+        ? import.meta.env.VITE_API_URL.replace('/api', '') 
+        : 'http://localhost:3001';
       
       console.log('Attempting to connect to backend server:', baseUrl);
       

@@ -9,7 +9,7 @@ export const PreviewMessage = ({ message }: { message: message; }) => {
 
   return (
     <motion.div
-      className="w-full mx-auto max-w-3xl px-4 group/message"
+      className="w-full mx-auto max-w-3xl px-4 group/message mb-8"
       initial={{ y: 5, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       data-role={message.role}
@@ -27,7 +27,7 @@ export const PreviewMessage = ({ message }: { message: message; }) => {
 
         <div className="flex flex-col w-full">
           {message.content && (
-            <div className="flex flex-col gap-4 text-left text-base">
+            <div className="flex flex-col gap-6 text-left text-base py-3">
               <Markdown>{message.content}</Markdown>
             </div>
           )}
@@ -46,7 +46,7 @@ export const ThinkingMessage = () => {
 
   return (
     <motion.div
-      className="w-full mx-auto max-w-3xl px-4 group/message "
+      className="w-full mx-auto max-w-3xl px-4 group/message mb-8"
       initial={{ y: 5, opacity: 0 }}
       animate={{ y: 0, opacity: 1, transition: { delay: 0.2 } }}
       data-role={role}

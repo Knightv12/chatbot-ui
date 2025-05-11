@@ -24,8 +24,8 @@ export function Chat() {
     // Initialize WebSocket connection
     const initSocket = () => {
       try {
-        // 使用正確的WebSocket連接路徑
-        const wsUrl = 'ws://localhost:3001/ws';
+        // 使用環境變數中的WebSocket連接路徑
+        const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
         console.log(`嘗試連接WebSocket: ${wsUrl}`);
         
         const ws = new WebSocket(wsUrl);

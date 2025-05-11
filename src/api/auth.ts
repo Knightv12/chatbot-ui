@@ -1,6 +1,6 @@
 import { User } from '../interfaces/interfaces';
 
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const login = async (data: { email: string; password: string }) => {
   const response = await fetch(`${API_URL}/auth/login`, {
