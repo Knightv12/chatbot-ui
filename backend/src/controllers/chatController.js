@@ -117,8 +117,8 @@ ${wolframTextResult}
           // 如果有直接 Wolfram 圖像 URL，添加到回應中
           if (directWolframImage) {
             console.log('添加 Wolfram Alpha 圖像到回應');
-            // 直接添加URL，不使用特殊標記或HTML標籤
-            response += `\n\n以下是 Wolfram Alpha 生成的圖形：\n\n${directWolframImage}`;
+            // 使用 Markdown 圖片語法
+            response += `\n\n![Wolfram Alpha 圖形](${directWolframImage})`;
           }
           
         } catch (llmError) {
@@ -240,16 +240,12 @@ ${wolframTextResult}
     }
 
     // 如果有直接 Wolfram 圖像 URL，添加到響應中
-    if (directWolframImage) {
-      console.log('將直接 Wolfram 圖像 URL 添加到響應中');
-      if (!responseData.wolframData) {
-        responseData.wolframData = { text: [], images: [] };
-      }
-      responseData.wolframData.images.push({
-        title: 'Wolfram Alpha 圖形',
-        url: directWolframImage
-      });
+    if (directWolframImage && !response.includes('![Wolfram Alpha 圖形]')) {
+      response += `\n\n![Wolfram Alpha 圖形](${directWolframImage})\n`;
     }
+    responseData.response = response;
+
+    console.log('最終 response:', response);
 
     res.status(200).json(responseData);
   } catch (error) {

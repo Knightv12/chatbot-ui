@@ -11,6 +11,7 @@ import { WolframImage, extractWolframUrl } from './wolframImage';
 import type { message as MessageType, WolframContent } from "../../interfaces/interfaces";
 
 export const PreviewMessage = ({ message }: { message: message; }) => {
+  console.log('message.content:', message.content);
   return (
     <motion.div
       className="w-full flex justify-center mx-auto max-w-3xl px-4 group/message mb-8"
@@ -89,10 +90,15 @@ export const Message = ({ message }: { message: MessageType }) => {
     if (typeof message.content !== "string") return;
 
     // 提取 Wolfram Alpha 圖片 URL
-    const wolframImgRegex = /(https:\/\/api\.wolframalpha\.com\/v1\/simple[^\s]*)/g;
+    const wolframImgRegex = /(?:\[WOLFRAM_IMAGE\](.*?)\[\/WOLFRAM_IMAGE\]|https:\/\/api\.wolframalpha\.com\/v1\/simple[^\s]*)/g;
     const matches = message.content.match(wolframImgRegex);
     if (matches) {
-      setExtractedImageUrls(matches);
+      // 處理特殊標記格式
+      const urls = matches.map(match => {
+        const specialTagMatch = match.match(/\[WOLFRAM_IMAGE\](.*?)\[\/WOLFRAM_IMAGE\]/);
+        return specialTagMatch ? specialTagMatch[1].trim() : match.trim();
+      });
+      setExtractedImageUrls(urls);
     }
 
     setProcessedContent(message.content);
@@ -140,6 +146,7 @@ export const Message = ({ message }: { message: MessageType }) => {
   }
 
   if (typeof message.content === "string") {
+    console.log('message.content:', message.content);
     return (
       <div className="w-full flex justify-center mx-auto max-w-3xl px-4 group/message mb-8">
         <div className="message relative text-left">
@@ -163,19 +170,6 @@ export const Message = ({ message }: { message: MessageType }) => {
               <div>提取的圖片 URL: {extractedImageUrls.join(', ')}</div>
             </div>
           )}
-
-          {extractedImageUrls.map((url, i) => (
-            !imageLoadErrors[url] && (
-              <div key={i} className="mt-4">
-                <img 
-                  src={url} 
-                  alt="Wolfram Alpha 結果" 
-                  className="max-w-[400px] rounded-lg shadow-lg"
-                  onError={() => handleImageError(url)}
-                />
-              </div>
-            )
-          ))}
         </div>
       </div>
     );

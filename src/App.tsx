@@ -12,6 +12,7 @@ import Reviews from './pages/Reviews';
 import StudentProgress from './pages/StudentProgress';
 import { useAuth } from './context/AuthContext';
 import Settings from './pages/Settings';
+import ReactMarkdown from "react-markdown";
 
 // 保護路由組件
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -63,6 +64,16 @@ function App() {
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/chat" />} />
           </Routes>
+          <div>
+            <h1>測試 Wolfram Alpha 圖片</h1>
+            <ReactMarkdown>
+              {`
+這是測試圖片：
+
+![測試圖片](https://api.wolframalpha.com/v1/simple?appid=5PYGQG-WRJHRP392T&i=plot(sin(x)%2C%20%7Bx%2C%20-10%CF%80%2C%2010%CF%80%7D)&width=800)
+              `}
+            </ReactMarkdown>
+          </div>
         </ChatProvider>
       </AuthProvider>
     </ThemeProvider>

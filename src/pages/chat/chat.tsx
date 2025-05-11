@@ -164,7 +164,7 @@ export function Chat() {
           className="flex items-center gap-2"
         >
           <PlusCircle className="h-4 w-4" />
-          新對話
+          New Chat
         </Button>
         <Button
           variant="outline"
@@ -173,7 +173,7 @@ export function Chat() {
           className="flex items-center gap-2"
         >
           <Trash2 className="h-4 w-4" />
-          清除訊息
+          Clear Messages
         </Button>
       </div>
       <div className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4" ref={messagesContainerRef}>

@@ -13,6 +13,12 @@ const WolframLinkDetector = (text: string) => {
   // 清理文本
   const cleanText = text.trim();
   
+  // 檢查特殊標記格式
+  if (cleanText.startsWith('[WOLFRAM_IMAGE]') && cleanText.endsWith('[/WOLFRAM_IMAGE]')) {
+    console.log('檢測到Wolfram Alpha特殊標記格式');
+    return true;
+  }
+  
   // 檢查是否是完整的URL
   if (
     cleanText.startsWith('http') && 
@@ -24,7 +30,7 @@ const WolframLinkDetector = (text: string) => {
       cleanText.includes('v1/plot')
     )
   ) {
-    console.log('檢測到Wolfram Alpha純URL (更新後):', cleanText);
+    console.log('檢測到Wolfram Alpha純URL:', cleanText);
     return true;
   }
   
@@ -32,6 +38,8 @@ const WolframLinkDetector = (text: string) => {
 };
 
 const NonMemoizedMarkdown = ({ children }: { children: string }) => {
+  
+  console.log('Markdown children:', children);
   
   // 檢查文本中是否有URL並嘗試渲染
   React.useEffect(() => {
@@ -48,49 +56,16 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
     }
   }, [children]);
   
+  // 自動將 code block 內的圖片語法移到 code block 外
+  let fixedChildren = children.replace(/```[\s\S]*?```/g, (block) => {
+    // 將 code block 內的 ![xxx](url) 移除
+    return block.replace(/!\[.*?\]\(.*?\)/g, '');
+  });
+  // 將 code block 外的 ![xxx](url) 單獨一行
+  fixedChildren = fixedChildren.replace(/([^\n])(!\[.*?\]\(.*?\))/g, '$1\n$2');
+
   const components = {
     p: ({ node, children, ...props }: any) => {
-      // 檢查段落是否只包含Wolfram Alpha URL
-      if (typeof children === 'string' && WolframLinkDetector(children)) {
-        return (
-          <div className="my-4">
-            <img 
-              src={children.trim()} 
-              alt="Wolfram Alpha 圖形" 
-              className="max-w-full rounded-lg border border-gray-200 dark:border-gray-700" 
-              loading="lazy"
-            />
-          </div>
-        );
-      }
-      
-      // 檢查子元素中是否有Wolfram Alpha URL
-      const hasWolframLink = React.Children.toArray(children).some(
-        child => typeof child === 'string' && WolframLinkDetector(child)
-      );
-      
-      if (hasWolframLink) {
-        return (
-          <div className="text-base leading-6 mb-6">
-            {React.Children.map(children, child => {
-              if (typeof child === 'string' && WolframLinkDetector(child)) {
-                return (
-                  <div className="my-4">
-                    <img 
-                      src={child.trim()} 
-                      alt="Wolfram Alpha 圖形" 
-                      className="max-w-full rounded-lg border border-gray-200 dark:border-gray-700" 
-                      loading="lazy"
-                    />
-                  </div>
-                );
-              }
-              return child;
-            })}
-          </div>
-        );
-      }
-      
       return (
         <p className="text-base leading-6 mb-6" {...props}>
           {children}
@@ -223,7 +198,7 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
         rehypePlugins={[rehypeRaw]} 
         components={components}
       >
-        {children}
+        {fixedChildren}
       </ReactMarkdown>
     </div>
   );

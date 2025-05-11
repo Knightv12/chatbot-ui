@@ -51,6 +51,7 @@ export const authAPI = {
 export const chatAPI = {
   sendMessage: async (data: { message: string; topic: string }) => {
     const response = await api.post('/chat/message', data);
+    console.log('API /chat/message 回傳:', response.data);
     return response.data;
   },
   getHistory: async () => {
