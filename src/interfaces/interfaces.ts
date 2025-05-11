@@ -1,8 +1,13 @@
-export interface message{
-    content:string;
-    role: "user" | "assistant";
-    id:string;
-}
+export type WolframContent = {
+  text?: string[];
+  images?: { title: string; url: string }[];
+};
+
+export type message = {
+  role: "user" | "assistant";
+  content: string | WolframContent;
+  id: string;
+};
 
 export interface User {
   id: string;

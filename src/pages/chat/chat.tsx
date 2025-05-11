@@ -9,6 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 import LeftSidebar from '@/components/custom/mainleftsidebar';
 import { useAuth } from '../../context/AuthContext';
 import { useChat } from '../../context/ChatContext';
+import { Message } from "../../components/custom/message";
+import { Button } from "@/components/ui/button";
+import { PlusCircle, Trash2 } from 'lucide-react';
 
 export function Chat() {
   const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();
@@ -19,6 +22,15 @@ export function Chat() {
   const socketRef = useRef<WebSocket | null>(null);
   const { user, logout } = useAuth();
   const { sendMessage } = useChat();
+
+  const handleNewChat = () => {
+    setMessages([]);
+    setQuestion("");
+  };
+
+  const handleClearMessages = () => {
+    setMessages([]);
+  };
 
   useEffect(() => {
     // Initialize WebSocket connection
@@ -101,19 +113,31 @@ export function Chat() {
           cleanupMessageHandler();
           return;
         }
-        
+
+        let parsed;
+        try {
+          parsed = JSON.parse(event.data);
+        } catch {
+          parsed = null;
+        }
+
         setMessages(prev => {
           const lastMessage = prev[prev.length - 1];
-          const newContent = lastMessage?.role === "assistant" 
-            ? lastMessage.content + event.data 
-            : event.data;
-          
+          let newContent;
+          if (parsed && (parsed.text || parsed.images)) {
+            newContent = parsed; // 直接存物件
+          } else {
+            newContent = lastMessage?.role === "assistant"
+              ? (typeof lastMessage.content === "string" ? lastMessage.content : "") + event.data
+              : event.data;
+          }
+
           const newMessage: message = { 
             content: newContent, 
             role: "assistant" as const, 
             id: traceId 
           };
-          
+
           return lastMessage?.role === "assistant"
             ? [...prev.slice(0, -1), newMessage]
             : [...prev, newMessage];
@@ -132,10 +156,30 @@ export function Chat() {
     <div className="flex flex-col min-w-0 h-dvh bg-background">
       <LeftSidebar />
       <Header user={user} onLogout={logout} />
+      <div className="flex justify-end gap-2 px-4 py-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleNewChat}
+          className="flex items-center gap-2"
+        >
+          <PlusCircle className="h-4 w-4" />
+          新對話
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleClearMessages}
+          className="flex items-center gap-2"
+        >
+          <Trash2 className="h-4 w-4" />
+          清除訊息
+        </Button>
+      </div>
       <div className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4" ref={messagesContainerRef}>
         {messages.length == 0 && <Overview />}
         {messages.map((message, index) => (
-          <PreviewMessage key={index} message={message} />
+          <Message key={index} message={message} />
         ))}
         {isLoading && <ThinkingMessage />}
         <div ref={messagesEndRef} className="shrink-0 min-w-[24px] min-h-[24px]"/>

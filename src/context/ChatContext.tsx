@@ -2,10 +2,16 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { chatAPI } from '../lib/api';
 import { useAuth } from './AuthContext';
 
+interface WolframData {
+  text: string[];
+  images: { title: string; url: string }[];
+}
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  wolframData?: WolframData;
 }
 
 interface Chat {
@@ -50,20 +56,32 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await chatAPI.sendMessage({ message, topic });
       
-      // Update current chat
+      // 創建助手消息對象，包含可選的 Wolfram 數據
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: response.response,
+        timestamp: new Date()
+      };
+      
+      // 如果響應中包含 Wolfram 數據，則添加到消息中
+      if (response.wolframData) {
+        assistantMessage.wolframData = response.wolframData;
+      }
+      
+      // 更新當前聊天
       if (currentChat) {
         const updatedChat: Chat = {
           ...currentChat,
           messages: [
             ...currentChat.messages,
             { role: 'user', content: message, timestamp: new Date() },
-            { role: 'assistant', content: response.response, timestamp: new Date() }
+            assistantMessage
           ]
         };
         setCurrentChat(updatedChat);
       }
 
-      // Update chat list
+      // 更新聊天列表
       await getHistory();
     } catch (error) {
       console.error('Error sending message:', error);

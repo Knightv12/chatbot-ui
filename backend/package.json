@@ -10,6 +10,7 @@
   "dependencies": {
     "@langchain/community": "^0.0.27",
     "@langchain/core": "^0.1.23",
+    "axios": "^1.9.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
@@ -19,6 +20,7 @@
     "langchain": "^0.1.9",
     "mongoose": "^7.0.3",
     "morgan": "^1.10.0",
+    "wolfram-alpha-api": "^0.2.1",
     "ws": "^8.13.0"
   },
   "devDependencies": {

@@ -1,10 +1,96 @@
 import { memo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import React from "react";
+
+const WolframLinkDetector = (text: string) => {
+  // 檢查文本中是否有Wolfram Alpha URL
+  if (!text || typeof text !== 'string') {
+    return false;
+  }
+  
+  // 清理文本
+  const cleanText = text.trim();
+  
+  // 檢查是否是完整的URL
+  if (
+    cleanText.startsWith('http') && 
+    cleanText.includes('api.wolframalpha.com') && 
+    !cleanText.includes(' ') &&
+    (
+      cleanText.includes('simple?appid=') ||
+      cleanText.includes('v1/simple?') ||
+      cleanText.includes('v1/plot')
+    )
+  ) {
+    console.log('檢測到Wolfram Alpha純URL (更新後):', cleanText);
+    return true;
+  }
+  
+  return false;
+};
 
 const NonMemoizedMarkdown = ({ children }: { children: string }) => {
+  
+  // 檢查文本中是否有URL並嘗試渲染
+  React.useEffect(() => {
+    if (children && children.includes('api.wolframalpha.com')) {
+      console.log('Markdown組件檢測到Wolfram Alpha URL:');
+      
+      // 提取所有URL
+      const urls = children.match(/https:\/\/api\.wolframalpha\.com\/[^\s"')]+/g);
+      if (urls) {
+        urls.forEach((url, index) => {
+          console.log(`URL ${index + 1}: ${url}`);
+        });
+      }
+    }
+  }, [children]);
+  
   const components = {
     p: ({ node, children, ...props }: any) => {
+      // 檢查段落是否只包含Wolfram Alpha URL
+      if (typeof children === 'string' && WolframLinkDetector(children)) {
+        return (
+          <div className="my-4">
+            <img 
+              src={children.trim()} 
+              alt="Wolfram Alpha 圖形" 
+              className="max-w-full rounded-lg border border-gray-200 dark:border-gray-700" 
+              loading="lazy"
+            />
+          </div>
+        );
+      }
+      
+      // 檢查子元素中是否有Wolfram Alpha URL
+      const hasWolframLink = React.Children.toArray(children).some(
+        child => typeof child === 'string' && WolframLinkDetector(child)
+      );
+      
+      if (hasWolframLink) {
+        return (
+          <div className="text-base leading-6 mb-6">
+            {React.Children.map(children, child => {
+              if (typeof child === 'string' && WolframLinkDetector(child)) {
+                return (
+                  <div className="my-4">
+                    <img 
+                      src={child.trim()} 
+                      alt="Wolfram Alpha 圖形" 
+                      className="max-w-full rounded-lg border border-gray-200 dark:border-gray-700" 
+                      loading="lazy"
+                    />
+                  </div>
+                );
+              }
+              return child;
+            })}
+          </div>
+        );
+      }
+      
       return (
         <p className="text-base leading-6 mb-6" {...props}>
           {children}
@@ -69,6 +155,23 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
         </a>
       );
     },
+    img: ({ node, src, alt, ...props }: any) => {
+      console.log("渲染圖片:", src);
+      return (
+        <div className="my-4 flex flex-col items-center">
+          <img 
+            src={src} 
+            alt={alt || "圖片"} 
+            className="max-w-full rounded-lg border border-gray-200 dark:border-gray-700" 
+            loading="lazy"
+            {...props}
+          />
+          {alt && alt !== "Wolfram Alpha 圖形" && (
+            <span className="text-sm text-gray-500 mt-1">{alt}</span>
+          )}
+        </div>
+      );
+    },
     h1: ({ node, children, ...props }: any) => {
       return (
         <h1 className="text-2xl font-semibold mt-6 mb-2" {...props}>
@@ -115,7 +218,11 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
 
   return (
     <div className="text-base font-normal">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown 
+        remarkPlugins={[remarkGfm]} 
+        rehypePlugins={[rehypeRaw]} 
+        components={components}
+      >
         {children}
       </ReactMarkdown>
     </div>
